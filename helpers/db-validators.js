@@ -31,8 +31,6 @@ const isUserExist = async (id = "") => {
   // Verificar User existe
   const existUser = await User.findById(id);
 
-  console.log(existUser);
-
   if (!existUser) {
     throw new Error(`The user with ID ${id} don't exist`);
   }

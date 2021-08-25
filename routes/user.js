@@ -7,8 +7,14 @@ const {
   isUserExist,
   isUniqueEmail,
 } = require("../helpers/db-validators");
-const { validFields } = require("../middlewares/valid-fields");
-const { validPageAndLimit } = require("../middlewares/valid-page-limit");
+
+const {
+  validFields,
+  validJWT,
+  validPageAndLimit,
+  isAdmin,
+  hasRole,
+} = require("../middlewares");
 
 const UserController = require("../controllers/user");
 class UserRoutes {
@@ -55,6 +61,9 @@ class UserRoutes {
     this.router.delete(
       "/:id",
       [
+        validJWT,
+        // isAdmin,
+        hasRole("ADMIN_ROLE", "USER_ROLE"),
         check("id", "This Id not valid mongoDB").isMongoId(),
         check("id").custom(isUserExist),
         validFields,
