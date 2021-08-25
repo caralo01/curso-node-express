@@ -2,15 +2,56 @@
 <html>
 
 <head>
-  <title>Acceso denegado</title>
+  <title>Google Signin</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="google-signin-client_id" content="198494714142-tk89a14bme53lf7v7ohf5r485gi4gcor.apps.googleusercontent.com">
+
 </head>
 
 <body>
 
-  <h1>Accesso denegado</h1>
-  <h2>Esto es una API REST</h2>
+  <h1>Google signin</h1>
+  <div class="g-signin2" data-onsuccess="onSignIn"></div>
+  <a href="#" onclick="signOut();">Sign out</a>
+
+  
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+  <script>
+    
+    const url = window.location.hostname.includes("localhost") ? "http://localhost:8080" : "https://restserver-caralo.herokuapp.com"
+
+    async function onSignIn(googleUser) {
+      const profile = googleUser.getBasicProfile();
+      console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+      console.log('Name: ' + profile.getName());
+      console.log('Image URL: ' + profile.getImageUrl());
+      console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+      try {
+        const id_token = googleUser.getAuthResponse().id_token;
+        const data = { id_token };
+        const res = await fetch(`${url}/api/auth/google`, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+        const value = await res.json();
+        console.log("response", value);
+      } catch(err) {
+        console.log("err", err);
+      }
+
+    }
+    function signOut() {
+      const auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+          console.log('User signed out.');
+        });
+    }
+  </script>
 
 </body>
 

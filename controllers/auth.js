@@ -2,7 +2,9 @@ const { response, request } = require("express");
 const bcryptjs = require("bcryptjs");
 
 const User = require("../models/user");
+
 const { generateJWT } = require("../helpers/generate-jwt");
+const { googleVerify } = require("../helpers/google-verify");
 
 const login = async (req = request, res = response) => {
   try {
@@ -34,7 +36,7 @@ const login = async (req = request, res = response) => {
     const token = await generateJWT(user.id);
 
     res.json({
-      msg: "post Api - Users",
+      msg: "post Api - Login",
       token,
     });
   } catch (err) {
@@ -44,6 +46,50 @@ const login = async (req = request, res = response) => {
   }
 };
 
+const googleSignIn = async (req = request, res = response) => {
+  try {
+    const { id_token } = req.body;
+
+    const { name, email, picture } = await googleVerify(id_token);
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        name,
+        email,
+        img: picture,
+        google: true,
+        password: "-",
+      });
+
+      await user.save();
+    }
+
+    // Usuario activo
+    if (!user.state) {
+      return res.status(404).json({
+        msg: "User isn't active",
+      });
+    }
+
+    // Generar token
+    const token = await generateJWT(user.id);
+
+    res.json({
+      msg: "post Api - Login Google",
+      token,
+      user,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      msg: "Concact with ADMIN",
+    });
+  }
+};
+
 module.exports = {
   login,
+  googleSignIn,
 };
