@@ -4,8 +4,9 @@ const { check } = require("express-validator");
 const {
   isRoleValid,
   isEmailExist,
-  isUserExist,
   isUniqueEmail,
+  isCategoryExist,
+  isUniqueCategoryName,
 } = require("../helpers/db-validators");
 
 const {
@@ -16,11 +17,11 @@ const {
   hasRole,
 } = require("../middlewares");
 
-const UserController = require("../controllers/user");
-class UserRoutes {
+const CategoryController = require("../controllers/category");
+class CategoryRouter {
   constructor() {
     this.router = Router();
-    this.userController = new UserController();
+    this.categoryController = new CategoryController();
 
     this.initRouter();
   }
@@ -29,23 +30,17 @@ class UserRoutes {
     this.router.get(
       "/",
       [validJWT, validPageAndLimit],
-      this.userController.getUsers
+      this.categoryController.getCategories
     );
 
     this.router.post(
       "/",
       [
+        validJWT,
         check("name", "Name is required").not().isEmpty(),
-        check("email", "This email is not valid").isEmail(),
-        check("email").custom(isEmailExist),
-        check("password", "Passsword must have minium 6 letters").isLength({
-          min: 6,
-        }),
-        // check('role', 'This role is not valid').isIn(['ADMIN_ROLE', 'USER_ROLE']),
-        check("role").custom(isRoleValid),
         validFields,
       ],
-      this.userController.postUser
+      this.categoryController.postCategory
     );
 
     this.router.put(
@@ -53,15 +48,23 @@ class UserRoutes {
       [
         validJWT,
         check("id", "This Id not valid mongoDB").isMongoId(),
-        check("id").custom(isUserExist),
-        check("id").custom((id, { req }) => isUniqueEmail(id, req)),
-        check("role").custom(isRoleValid),
+        check("id").custom(isCategoryExist),
+        check("id").custom((id, { req }) => isUniqueCategoryName(id, req)),
         validFields,
       ],
-      this.userController.putUser
+      this.categoryController.putCategory
     );
 
-    this.router.patch("/:id", this.userController.patchUser);
+    this.router.get(
+      "/:id",
+      [
+        validJWT,
+        check("id", "This Id not valid mongoDB").isMongoId(),
+        check("id").custom(isCategoryExist),
+        validFields,
+      ],
+      this.categoryController.getCategory
+    );
 
     this.router.delete(
       "/:id",
@@ -70,10 +73,10 @@ class UserRoutes {
         // isAdmin,
         hasRole("ADMIN_ROLE", "USER_ROLE"),
         check("id", "This Id not valid mongoDB").isMongoId(),
-        check("id").custom(isUserExist),
+        check("id").custom(isCategoryExist),
         validFields,
       ],
-      this.userController.deleteUser
+      this.categoryController.deleteCategory
     );
   }
 
@@ -81,4 +84,4 @@ class UserRoutes {
     return this.router;
   }
 }
-module.exports = UserRoutes;
+module.exports = CategoryRouter;

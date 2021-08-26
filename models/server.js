@@ -1,19 +1,28 @@
 const express = require("express");
 const cors = require("cors");
 
-const UserRouter = require("../routes/user");
 const AuthRouter = require("../routes/auth");
+const CategoryRouter = require("../routes/category");
+const UserRouter = require("../routes/user");
+
 const Config = require("../database/config");
+const ProductRouter = require("../routes/product");
 
 class Server {
   constructor() {
     this.app = express();
     this.port = process.env.PORT;
 
-    this.userRouter = new UserRouter();
     this.authRouter = new AuthRouter();
-    this.authPath = "/api/auth";
-    this.usersPath = "/api/users";
+    this.categoryRouter = new CategoryRouter();
+    this.productRouter = new ProductRouter();
+    this.userRouter = new UserRouter();
+    this.path = {
+      auth: "/api/auth",
+      categories: "/api/categories",
+      products: "/api/products",
+      users: "/api/users",
+    };
 
     // Conectar BD
     this.conectarDB();
@@ -41,8 +50,10 @@ class Server {
   }
 
   routes() {
-    this.app.use(this.authPath, this.authRouter.getRouter());
-    this.app.use(this.usersPath, this.userRouter.getRouter());
+    this.app.use(this.path.auth, this.authRouter.getRouter());
+    this.app.use(this.path.categories, this.categoryRouter.getRouter());
+    this.app.use(this.path.products, this.productRouter.getRouter());
+    this.app.use(this.path.users, this.userRouter.getRouter());
   }
 
   start() {
