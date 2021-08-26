@@ -7,6 +7,7 @@ const UserRouter = require("../routes/user");
 
 const Config = require("../database/config");
 const ProductRouter = require("../routes/product");
+const SearchRouter = require("../routes/search");
 
 class Server {
   constructor() {
@@ -16,11 +17,13 @@ class Server {
     this.authRouter = new AuthRouter();
     this.categoryRouter = new CategoryRouter();
     this.productRouter = new ProductRouter();
+    this.searchRouter = new SearchRouter();
     this.userRouter = new UserRouter();
     this.path = {
       auth: "/api/auth",
       categories: "/api/categories",
       products: "/api/products",
+      search: "/api/search",
       users: "/api/users",
     };
 
@@ -53,6 +56,7 @@ class Server {
     this.app.use(this.path.auth, this.authRouter.getRouter());
     this.app.use(this.path.categories, this.categoryRouter.getRouter());
     this.app.use(this.path.products, this.productRouter.getRouter());
+    this.app.use(this.path.search, this.searchRouter.getRouter());
     this.app.use(this.path.users, this.userRouter.getRouter());
   }
 
