@@ -82,6 +82,20 @@ const isUniqueProductName = async (id, req) => {
   }
 };
 
+// Uploads
+/**
+ * Validar colecciones permitidas
+ */
+const allowedCollections = (collection = "", collections = []) => {
+  const incluid = collections.includes(collection);
+  if (!incluid) {
+    throw new Error(
+      `La colección ${collection} no es permitida, ${collections}`
+    );
+  }
+  return true;
+};
+
 module.exports = {
   isRoleValid,
   isEmailExist,
@@ -91,4 +105,5 @@ module.exports = {
   isUniqueCategoryName,
   isProductExist,
   isUniqueProductName,
+  allowedCollections,
 };
