@@ -4,7 +4,8 @@ const { check } = require("express-validator");
 const { isEmailExist } = require("../helpers/db-validators");
 const { validFields } = require("../middlewares/valid-fields");
 
-const { login, googleSignIn } = require("../controllers/auth");
+const { login, googleSignIn, renovateToken } = require("../controllers/auth");
+const { validJWT } = require("../middlewares");
 
 class AuthRoutes {
   constructor() {
@@ -23,11 +24,14 @@ class AuthRoutes {
       ],
       login
     );
+
     this.router.post(
       "/google",
       [check("id_token", "id_token is required").not().isEmpty(), validFields],
       googleSignIn
     );
+
+    this.router.get("/validate-token", validJWT, renovateToken);
   }
 
   getRouter() {

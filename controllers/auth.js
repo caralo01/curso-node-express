@@ -89,7 +89,26 @@ const googleSignIn = async (req = request, res = response) => {
   }
 };
 
+const renovateToken = async (req = request, res = response) => {
+  try {
+    const { user } = req;
+    const token = await generateJWT(user.id);
+
+    res.json({
+      msg: "post Api - Renovate Token",
+      token,
+      user,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      msg: "Concact with ADMIN",
+    });
+  }
+};
+
 module.exports = {
   login,
   googleSignIn,
+  renovateToken,
 };

@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
+const { createServer } = require("http");
+const io = require("socket.io");
 
 const AuthRouter = require("../routes/auth");
 const CategoryRouter = require("../routes/category");
@@ -10,11 +12,14 @@ const Config = require("../database/config");
 const ProductRouter = require("../routes/product");
 const SearchRouter = require("../routes/search");
 const uploadRouter = require("../routes/upload");
+const { socketController } = require("../controllers/socket");
 
 class Server {
   constructor() {
     this.app = express();
     this.port = process.env.PORT;
+    this.server = createServer(this.app);
+    this.io = io(this.server);
 
     this.authRouter = new AuthRouter();
     this.categoryRouter = new CategoryRouter();
@@ -35,6 +40,9 @@ class Server {
 
     // Middlewares
     this.middlewares();
+
+    // Sockets
+    this.sockets();
 
     // Rutas de la aplicación
     this.routes();
@@ -73,8 +81,12 @@ class Server {
     this.app.use(this.path.users, this.userRouter.getRouter());
   }
 
+  sockets() {
+    this.io.on("connection", (socket) => socketController(socket, this.io));
+  }
+
   start() {
-    this.app.listen(this.port, () => {
+    this.server.listen(this.port, () => {
       console.log("Servidor corriendo en el puerto", this.port);
     });
   }
